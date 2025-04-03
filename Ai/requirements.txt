@@ -1,0 +1,7 @@
+google-generativeai
+SpeechRecognition
+pyaudio
+pyttsx3
+flask
+
+#pip install requirement.txt

@@ -8,6 +8,7 @@ import SmartIniegration from './components/Smartintegration/SmartIniegration';
 import WeatherSoildata from './components/WeatherSoildata/WeatherSoildata';
 import CropRecomadation from './components/Croprecomendation/CropRecomadation';
 import Chatbot from './components/Chatbot/Chatbot';
+import PestDetection from './components/Pestdetection/PestDetection';
 
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -38,6 +39,7 @@ function App() {
           <Route path="/smartintegration" element={<SmartIniegration />} />
           <Route path="/weathersoildata" element={<WeatherSoildata />} />
           <Route path="/croprecommendation" element={<CropRecomadation />} />
+          <Route path='/pestdetection' element={<PestDetection />} />
         </Routes>
       </Router>
     </ClerkProvider>

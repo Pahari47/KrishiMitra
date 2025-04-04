@@ -63,7 +63,7 @@ const WeatherSoildata = () => {
   const [daysToShow, setDaysToShow] = useState(7);
   const [locationPermission, setLocationPermission] = useState('prompt');
 
-  // Replace with your OpenWeatherMap API key
+  // OpenWeatherMap API key
   const API_KEY = '824486414437db7a528a1d6737b565f7';
   const API_URL = `https://api.openweathermap.org/data/2.5/forecast/daily`;
 

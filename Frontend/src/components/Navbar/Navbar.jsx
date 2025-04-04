@@ -57,6 +57,8 @@ const Navbar = () => {
 
   const navLinks = isSignedIn ? privateNavLinks : publicNavLinks;
 
+  
+
   return (
     <>
       <motion.nav

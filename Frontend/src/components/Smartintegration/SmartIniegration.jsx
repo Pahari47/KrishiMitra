@@ -62,7 +62,7 @@ const SmartIntegration = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // API call - this would be your actual pump API endpoint
+      // pump API endpoint
       // const response = await axios.get(`${PUMP_API_URL}`);
       // const data = response.data;
       

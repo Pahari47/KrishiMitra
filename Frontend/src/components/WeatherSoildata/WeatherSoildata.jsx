@@ -8,7 +8,8 @@ import {
   FiSun,
   FiCalendar,
   FiRefreshCw,
-  FiNavigation
+  FiNavigation,
+  FiDatabase
 } from 'react-icons/fi';
 import axios from 'axios';
 import { Line, Bar } from 'react-chartjs-2';
@@ -37,16 +38,25 @@ ChartJS.register(
 );
 
 const WeatherSoildata = () => {
+  // Weather data state
   const [weatherData, setWeatherData] = useState({
     location: '--',
     humidity: '--',
     temperature: '--',
     skyCondition: '--',
     windSpeed: '--',
-    soilMoisture: '--',
     lastUpdated: '--'
   });
   
+  // Soil data state
+  const [soilData, setSoilData] = useState({
+    moisture: '--',
+    temperature: '--',
+    humidity: '--',
+    lastUpdated: '--'
+  });
+  
+  // Historical data state (now using random values)
   const [historicalData, setHistoricalData] = useState({
     temperature: [],
     rainfall: [],
@@ -63,9 +73,10 @@ const WeatherSoildata = () => {
   const [daysToShow, setDaysToShow] = useState(7);
   const [locationPermission, setLocationPermission] = useState('prompt');
 
-  // OpenWeatherMap API key
-  const API_KEY = '824486414437db7a528a1d6737b565f7';
-  const API_URL = `https://api.openweathermap.org/data/2.5/forecast/daily`;
+  // API endpoints
+  const WEATHER_API_KEY = '824486414437db7a528a1d6737b565f7';
+  const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
+  const SOIL_API_URL = 'https://your-soil-api.example.com/sensor'; // Replace with your soil API
 
   // Sky condition icons mapping
   const skyConditionIcons = {
@@ -90,7 +101,8 @@ const WeatherSoildata = () => {
           });
           setLocationPermission('granted');
           fetchWeatherData(position.coords.latitude, position.coords.longitude);
-          fetchHistoricalData(position.coords.latitude, position.coords.longitude);
+          fetchSoilData();
+          generateHistoricalData();
         },
         (err) => {
           setError('Location access denied. Using default location.');
@@ -100,7 +112,8 @@ const WeatherSoildata = () => {
           const defaultLon = -74.0060;
           setCoords({ lat: defaultLat, lon: defaultLon });
           fetchWeatherData(defaultLat, defaultLon);
-          fetchHistoricalData(defaultLat, defaultLon);
+          fetchSoilData();
+          generateHistoricalData();
         }
       );
     } else {
@@ -109,13 +122,13 @@ const WeatherSoildata = () => {
     }
   };
 
-  // Fetch current weather data from OpenWeatherMap API
+  // Fetch current weather data
   const fetchWeatherData = async (lat, lon) => {
     setIsLoading(true);
     setError(null);
     try {
       const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
+        `${WEATHER_API_URL}?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`
       );
       
       const data = response.data;
@@ -126,54 +139,67 @@ const WeatherSoildata = () => {
         humidity: `${data.main.humidity}%`,
         temperature: `${Math.round(data.main.temp)}°C`,
         skyCondition: condition,
-        windSpeed: `${(data.wind.speed * 3.6).toFixed(1)} km/h`, // Convert m/s to km/h
-        soilMoisture: '--', // Not available in OpenWeatherMap
+        windSpeed: `${(data.wind.speed * 3.6).toFixed(1)} km/h`,
         lastUpdated: new Date().toLocaleTimeString()
       });
     } catch (err) {
-      setError('Failed to fetch current weather data');
+      setError('Failed to fetch weather data');
       console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fetch historical weather data from OpenWeatherMap API
-  const fetchHistoricalData = async (lat, lon) => {
+  // Fetch soil sensor data
+  const fetchSoilData = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get(
-        `${API_URL}?lat=${lat}&lon=${lon}&cnt=${daysToShow}&appid=${API_KEY}&units=metric`
-      );
+      // In a real app, this would be an actual API call
+      // const response = await axios.get(SOIL_API_URL);
+      // const data = response.data;
       
-      const data = response.data;
-      const dates = [];
-      const tempData = [];
-      const rainData = [];
+      // Mock response for demonstration
+      const mockResponse = {
+        moisture: `${Math.floor(Math.random() * 100)}%`,
+        temperature: `${Math.floor(Math.random() * 10) + 15}°C`, // 15-25°C range
+        humidity: `${Math.floor(Math.random() * 30) + 50}%`, // 50-80% range
+        lastUpdated: new Date().toLocaleTimeString()
+      };
       
-      data.list.forEach((day, index) => {
-        const date = new Date(day.dt * 1000);
-        dates.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
-        tempData.push(Math.round(day.temp.day));
-        rainData.push(day.rain ? day.rain.toFixed(1) : 0);
-      });
-      
-      setHistoricalData({
-        temperature: tempData,
-        rainfall: rainData,
-        dates: dates,
-        maxTemp: `${Math.max(...tempData)}°C`,
-        minTemp: `${Math.min(...tempData)}°C`,
-        maxRainfall: `${Math.max(...rainData)} mm`,
-        minRainfall: `${Math.min(...rainData)} mm`
-      });
+      setSoilData(mockResponse);
     } catch (err) {
-      setError('Nahi dunga tujhe data');
+      setError('Failed to fetch soil sensor data');
       console.error(err);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Generate random historical data
+  const generateHistoricalData = () => {
+    const tempData = [];
+    const rainData = [];
+    const dates = [];
+    
+    // Generate data for the selected number of days
+    for (let i = daysToShow - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      dates.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
+      tempData.push(Math.floor(Math.random() * 15) + 15); // 15-30°C range
+      rainData.push(Math.random() > 0.7 ? (Math.random() * 10).toFixed(1) : 0); // 70% chance of no rain
+    }
+    
+    setHistoricalData({
+      temperature: tempData,
+      rainfall: rainData,
+      dates: dates,
+      maxTemp: `${Math.max(...tempData)}°C`,
+      minTemp: `${Math.min(...tempData)}°C`,
+      maxRainfall: `${Math.max(...rainData)} mm`,
+      minRainfall: `${Math.min(...rainData)} mm`
+    });
   };
 
   // Temperature chart configuration
@@ -251,10 +277,11 @@ const WeatherSoildata = () => {
   useEffect(() => {
     getCurrentLocation();
     
-    // Set up polling for real-time updates (every 30 minutes for current weather)
+    // Set up polling for real-time updates (every 30 minutes)
     const interval = setInterval(() => {
       if (coords.lat && coords.lon) {
         fetchWeatherData(coords.lat, coords.lon);
+        fetchSoilData();
       }
     }, 1800000);
     
@@ -263,17 +290,15 @@ const WeatherSoildata = () => {
 
   // Update historical data when daysToShow changes
   useEffect(() => {
-    if (coords.lat && coords.lon) {
-      fetchHistoricalData(coords.lat, coords.lon);
-    }
+    generateHistoricalData();
   }, [daysToShow]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-7xl mt-10 mx-auto">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-green-800">Smart Farm Weather Dashboard</h1>
-          <p className="text-gray-600">Real-time weather monitoring and historical data analysis</p>
+          <h1 className="text-3xl font-bold text-green-800">Smart Farm Dashboard</h1>
+          <p className="text-gray-600">Weather and soil monitoring system</p>
         </header>
         
         {/* Location Controls */}
@@ -318,7 +343,7 @@ const WeatherSoildata = () => {
             <FiCloud className="mr-2" /> Current Weather Conditions
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Location Card */}
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center mb-3">
@@ -364,28 +389,6 @@ const WeatherSoildata = () => {
                 {isLoading ? '...' : weatherData.skyCondition}
               </p>
             </div>
-            
-            {/* Wind Speed Card */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center mb-3">
-                <FiWind className="text-green-500 mr-2" />
-                <h3 className="font-medium text-gray-700">Wind Speed</h3>
-              </div>
-              <p className="text-2xl font-bold text-green-600">
-                {isLoading ? '...' : weatherData.windSpeed}
-              </p>
-            </div>
-            
-            {/* Soil Moisture Card */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center mb-3">
-                <FiDroplet className="text-teal-500 mr-2" />
-                <h3 className="font-medium text-gray-700">Soil Moisture</h3>
-              </div>
-              <p className="text-2xl font-bold text-teal-600">
-                {isLoading ? '...' : weatherData.soilMoisture}
-              </p>
-            </div>
           </div>
           
           <div className="mt-4 flex justify-between items-center">
@@ -396,7 +399,8 @@ const WeatherSoildata = () => {
               onClick={() => {
                 if (coords.lat && coords.lon) {
                   fetchWeatherData(coords.lat, coords.lon);
-                  fetchHistoricalData(coords.lat, coords.lon);
+                  fetchSoilData();
+                  generateHistoricalData();
                 }
               }}
               disabled={isLoading}
@@ -404,6 +408,62 @@ const WeatherSoildata = () => {
             >
               <FiRefreshCw className={`mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh All Data
+            </button>
+          </div>
+        </section>
+        
+        {/* Soil Data Section */}
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold text-green-700 mb-4 flex items-center">
+            <FiDatabase className="mr-2" /> Soil Conditions
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Soil Moisture Card */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center mb-3">
+                <FiDroplet className="text-teal-500 mr-2" />
+                <h3 className="font-medium text-gray-700">Soil Moisture</h3>
+              </div>
+              <p className="text-2xl font-bold text-teal-600">
+                {isLoading ? '...' : soilData.moisture}
+              </p>
+            </div>
+            
+            {/* Soil Temperature Card */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center mb-3">
+                <FiThermometer className="text-amber-500 mr-2" />
+                <h3 className="font-medium text-gray-700">Soil Temperature</h3>
+              </div>
+              <p className="text-2xl font-bold text-amber-600">
+                {isLoading ? '...' : soilData.temperature}
+              </p>
+            </div>
+            
+            {/* Soil Humidity Card */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center mb-3">
+                <FiDroplet className="text-indigo-500 mr-2" />
+                <h3 className="font-medium text-gray-700">Soil Humidity</h3>
+              </div>
+              <p className="text-2xl font-bold text-indigo-600">
+                {isLoading ? '...' : soilData.humidity}
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-4 flex justify-between items-center">
+            <p className="text-sm text-gray-500">
+              Last updated: {soilData.lastUpdated}
+            </p>
+            <button 
+              onClick={fetchSoilData}
+              disabled={isLoading}
+              className="flex items-center text-sm bg-green-100 text-green-700 px-4 py-2 rounded hover:bg-green-200 transition"
+            >
+              <FiRefreshCw className={`mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh Soil Data
             </button>
           </div>
         </section>
@@ -472,10 +532,8 @@ const WeatherSoildata = () => {
               <p className="font-medium text-green-800">Connected</p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-              <p className="text-sm text-green-600 mb-1">Location Services</p>
-              <p className="font-medium text-green-800">
-                {locationPermission === 'granted' ? 'Enabled' : 'Disabled'}
-              </p>
+              <p className="text-sm text-green-600 mb-1">Soil Sensor</p>
+              <p className="font-medium text-green-800">Connected</p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg border border-green-100">
               <p className="text-sm text-green-600 mb-1">Last Data Sync</p>

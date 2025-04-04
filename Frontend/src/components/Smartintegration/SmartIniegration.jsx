@@ -11,9 +11,9 @@ import {
 import axios from 'axios';
 
 const SmartIntegration = () => {
-  // State for weather data
-  const [weatherData, setWeatherData] = useState({
-    moisture: '--',
+  // State for all sensor data (now coming from pump API)
+  const [sensorData, setSensorData] = useState({
+    soilMoisture: '--',
     temperature: '--',
     humidity: '--',
     lastUpdated: '--'
@@ -31,12 +31,10 @@ const SmartIntegration = () => {
   const [coords, setCoords] = useState({ lat: null, lon: null });
   const [locationPermission, setLocationPermission] = useState('prompt');
 
-  // Replace with your OpenWeatherMap API key
-  const API_KEY = '824486414437db7a528a1d6737b565f7';
-  const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
+  // pump API endpoint
   const PUMP_API_URL = 'https://your-farm-api.example.com/pump';
 
-  // Get user's current location
+  // Get user's current location (kept for reference, though not used for API calls now)
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
       setIsLoading(true);
@@ -47,16 +45,10 @@ const SmartIntegration = () => {
             lon: position.coords.longitude
           });
           setLocationPermission('granted');
-          fetchWeatherData(position.coords.latitude, position.coords.longitude);
         },
         (err) => {
-          setError('Location access denied. Using default location.');
+          setError('Location access denied.');
           setLocationPermission('denied');
-          // Fallback to a default location (e.g., New York)
-          const defaultLat = 40.7128;
-          const defaultLon = -74.0060;
-          setCoords({ lat: defaultLat, lon: defaultLon });
-          fetchWeatherData(defaultLat, defaultLon);
         }
       );
     } else {
@@ -65,49 +57,44 @@ const SmartIntegration = () => {
     }
   };
 
-  // Fetch weather data from OpenWeatherMap API
-  const fetchWeatherData = async (lat, lon) => {
+  // Fetch all sensor data and pump status from pump API
+  const fetchPumpData = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get(
-        `${WEATHER_API_URL}?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
-      );
-      
-      const data = response.data;
-      
-      setWeatherData({
-        moisture: '--', // Not available in OpenWeatherMap - would need separate soil sensor
-        temperature: `${Math.round(data.main.temp)}°C`,
-        humidity: `${data.main.humidity}%`,
-        lastUpdated: new Date().toLocaleTimeString()
-      });
-    } catch (err) {
-      setError('Failed to fetch weather data');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch pump status from backend
-  const fetchPumpStatus = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // API call
+      // API call - this would be your actual pump API endpoint
       // const response = await axios.get(`${PUMP_API_URL}`);
-      // setPumpStatus(response.data);
+      // const data = response.data;
       
       // Mock response for demonstration
       const mockResponse = {
+        // Sensor data
+        soilMoisture: `${Math.floor(Math.random() * 100)}%`,
+        temperature: `${Math.floor(Math.random() * 30) + 10}°C`, // 10-40°C range
+        humidity: `${Math.floor(Math.random() * 50) + 30}%`, // 30-80% range
+        lastUpdated: new Date().toLocaleTimeString(),
+        
+        // Pump status
         isOn: Math.random() > 0.5,
         isAuto: Math.random() > 0.5,
         lastUsed: `${Math.floor(Math.random() * 24)} hours ago`
       };
-      setPumpStatus(mockResponse);
+      
+      // Update both sensor data and pump status from the same API response
+      setSensorData({
+        soilMoisture: mockResponse.soilMoisture,
+        temperature: mockResponse.temperature,
+        humidity: mockResponse.humidity,
+        lastUpdated: mockResponse.lastUpdated
+      });
+      
+      setPumpStatus({
+        isOn: mockResponse.isOn,
+        isAuto: mockResponse.isAuto,
+        lastUsed: mockResponse.lastUsed
+      });
     } catch (err) {
-      setError('Failed to fetch pump status');
+      setError('Failed to fetch data from pump controller');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -127,6 +114,12 @@ const SmartIntegration = () => {
         ...prev,
         isOn: !prev.isOn,
         lastUsed: 'Just now'
+      }));
+      
+      // Also update the lastUpdated time for sensor data
+      setSensorData(prev => ({
+        ...prev,
+        lastUpdated: new Date().toLocaleTimeString()
       }));
     } catch (err) {
       setError('Failed to toggle pump');
@@ -160,23 +153,15 @@ const SmartIntegration = () => {
   // Initial data fetch
   useEffect(() => {
     getCurrentLocation();
-    fetchPumpStatus();
+    fetchPumpData();
     
-    // Set up polling for real-time updates (every 30 minutes for weather)
-    const weatherInterval = setInterval(() => {
-      if (coords.lat && coords.lon) {
-        fetchWeatherData(coords.lat, coords.lon);
-      }
-    }, 1800000);
-    
-    // More frequent updates for pump status (every 30 seconds)
-    const pumpInterval = setInterval(() => {
-      fetchPumpStatus();
+    // Set up polling for updates (every 30 seconds)
+    const interval = setInterval(() => {
+      fetchPumpData();
     }, 30000);
     
     return () => {
-      clearInterval(weatherInterval);
-      clearInterval(pumpInterval);
+      clearInterval(interval);
     };
   }, []);
 
@@ -185,10 +170,10 @@ const SmartIntegration = () => {
       <div className="max-w-6xl mt-10 mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-green-800">Smart Farm Irrigation System</h1>
-          <p className="text-gray-600">Monitor weather and control your farm irrigation</p>
+          <p className="text-gray-600">Monitor farm conditions and control irrigation</p>
         </header>
         
-        {/* Location Controls */}
+        {/* Location Controls (kept but not essential for functionality) */}
         <div className="mb-6 bg-white p-4 rounded-lg shadow">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
@@ -213,10 +198,10 @@ const SmartIntegration = () => {
           </div>
         )}
         
-        {/* Weather Monitoring Section */}
+        {/* Sensor Data Section */}
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-green-700 mb-4 flex items-center">
-            <FiCloud className="mr-2" /> Weather Conditions
+            <FiCloud className="mr-2" /> Farm Conditions
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -227,10 +212,10 @@ const SmartIntegration = () => {
               </div>
               <h3 className="font-medium text-gray-700 mb-1">Soil Moisture</h3>
               <p className="text-3xl font-bold text-blue-600">
-                {isLoading ? '...' : weatherData.moisture}
+                {isLoading ? '...' : sensorData.soilMoisture}
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                Last updated: {weatherData.lastUpdated}
+                Last updated: {sensorData.lastUpdated}
               </p>
             </div>
             
@@ -241,10 +226,10 @@ const SmartIntegration = () => {
               </div>
               <h3 className="font-medium text-gray-700 mb-1">Temperature</h3>
               <p className="text-3xl font-bold text-orange-600">
-                {isLoading ? '...' : weatherData.temperature}
+                {isLoading ? '...' : sensorData.temperature}
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                Last updated: {weatherData.lastUpdated}
+                Last updated: {sensorData.lastUpdated}
               </p>
             </div>
             
@@ -255,26 +240,22 @@ const SmartIntegration = () => {
               </div>
               <h3 className="font-medium text-gray-700 mb-1">Humidity</h3>
               <p className="text-3xl font-bold text-teal-600">
-                {isLoading ? '...' : weatherData.humidity}
+                {isLoading ? '...' : sensorData.humidity}
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                Last updated: {weatherData.lastUpdated}
+                Last updated: {sensorData.lastUpdated}
               </p>
             </div>
           </div>
           
           <div className="mt-4 flex justify-end">
             <button 
-              onClick={() => {
-                if (coords.lat && coords.lon) {
-                  fetchWeatherData(coords.lat, coords.lon);
-                }
-              }}
+              onClick={fetchPumpData}
               disabled={isLoading}
               className="flex items-center text-sm bg-green-100 text-green-700 px-4 py-2 rounded hover:bg-green-200 transition"
             >
               <FiRefreshCw className={`mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh Weather Data
+              Refresh Data
             </button>
           </div>
         </section>
@@ -368,7 +349,7 @@ const SmartIntegration = () => {
           <h2 className="text-xl font-semibold text-green-700 mb-4">System Status</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-              <p className="text-sm text-green-600 mb-1">Weather API</p>
+              <p className="text-sm text-green-600 mb-1">Pump Controller</p>
               <p className="font-medium text-green-800">Connected</p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg border border-green-100">
@@ -378,12 +359,12 @@ const SmartIntegration = () => {
               </p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-              <p className="text-sm text-green-600 mb-1">Pump Controller</p>
-              <p className="font-medium text-green-800">Connected</p>
+              <p className="text-sm text-green-600 mb-1">Sensors</p>
+              <p className="font-medium text-green-800">Online</p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg border border-green-100">
               <p className="text-sm text-green-600 mb-1">Last Sync</p>
-              <p className="font-medium text-green-800">{new Date().toLocaleTimeString()}</p>
+              <p className="font-medium text-green-800">{sensorData.lastUpdated}</p>
             </div>
           </div>
         </section>

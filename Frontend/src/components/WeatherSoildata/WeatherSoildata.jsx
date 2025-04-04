@@ -169,7 +169,7 @@ const WeatherSoildata = () => {
         minRainfall: `${Math.min(...rainData)} mm`
       });
     } catch (err) {
-      setError('Failed to fetch historical weather data');
+      setError('Nahi dunga tujhe data');
       console.error(err);
     } finally {
       setIsLoading(false);

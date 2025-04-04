@@ -1,0 +1,265 @@
+{
+  "0": {
+    "Leaf Name": "Apple",
+    "Status": "Apple scab",
+    "Cause": "Fungus Venturia inaequalis",
+    "Treatment": "Apply fungicides (captan, mancozeb, or sulfur-based). Prune infected leaves and improve air circulation.",
+    "Prevention": "Use resistant apple varieties and practice crop rotation."
+  },
+  "1": {
+    "Leaf Name": "Apple",
+    "Status": "Black rot",
+    "Cause": "Fungus Botryosphaeria obtusa",
+    "Treatment": "Remove infected leaves and fruits. Apply fungicides (copper-based or thiophanate-methyl).",
+    "Prevention": "Avoid overhead irrigation and maintain proper tree spacing."
+  },
+  "2": {
+    "Leaf Name": "Apple",
+    "Status": "Cedar apple rust",
+    "Cause": "Fungus Gymnosporangium juniperi-virginianae",
+    "Treatment": "Apply fungicides (myclobutanil, propiconazole). Remove nearby cedar trees if possible",
+    "Prevention": "Use resistant apple varieties."
+  },
+  "3": {
+    "Leaf Name": "Apple",
+    "Status": "healthy",
+    "Treatment": "No treatment needed."
+  },
+  "4": {
+    "Leaf Name": "Blueberry",
+    "Status": "healthy",
+    "Treatment": "No treatment needed."
+  },
+  "5": {
+    "Leaf Name": "Cherry (including sour)",
+    "Status": "Powdery mildew",
+    "Cause": "Fungus Podosphaera clandestina",
+    "Treatment": "Apply sulfur-based or neem oil fungicides.",
+    "Prevention": "Prune for better airflow and avoid excessive nitrogen fertilizers."
+  },
+  "6": {
+    "Leaf Name": "Cherry (including sour)",
+    "Status": "healthy",
+    "Treatment": "No treatment needed."
+  },
+  "7": {
+    "Leaf Name": "Corn (maize)",
+    "Status": "Cercospora leaf spot Gray leaf Spot",
+    "Cause": "Fungus Cercospora zeae-maydis",
+    "Treatment": "Apply strobilurin or triazole fungicides. Avoid monocropping.",
+    "Prevention": "Rotate crops and use resistant hybrids."
+  },
+  "8": {
+    "Leaf Name": "Corn (maize)",
+    "Status": "Common rust",
+    "Cause": "Fungus Puccinia sorghi",
+    "Treatment": "Use resistant corn varieties and apply fungicides if severe.",
+    "Prevention": "Reduce humidity around plants."
+  },
+  "9": {
+    "Leaf Name": "Corn (maize)",
+    "Status": "Northern Leaf light",
+    "Cause": "Fungus Exserohilum turcicum",
+    "Treatment": "Apply fungicides (azoxystrobin, pyraclostrobin).",
+    "Prevention": "Rotate crops and remove infected plant debris."
+  },
+  "10": {
+    "Leaf Name": "Corn (maize)",
+    "Status": "healthy",
+    "Treatment": "No treatment needed."
+  },
+  "11": {
+    "Leaf Name": "Grape",
+    "Status": "Black rot",
+    "Cause": "Fungus Guignardia bidwellii",
+    "Treatment": "Remove infected leaves. Apply fungicides (mancozeb, copper-based).",
+    "Prevention": "Prune and maintain good airflow."
+  },
+  "12": {
+    "Leaf Name": "Grape",
+    "Status": "Esca (Black Measles)",
+    "Cause": "Fungus Phaeomoniella chlamydospora",
+    "Treatment": "Remove infected vines. Apply fungicides early in the season.",
+    "Prevention": "Avoid wounding vines."
+  },
+  "13": {
+    "Leaf Name": "Grape",
+    "Status": "Leaf blight (Isariopsis Leaf Spot)",
+    "Cause": "Fungus Isariopsis",
+    "Treatment": "Use fungicides (copper-based or myclobutanil).",
+    "Prevention": "Reduce plant stress and maintain soil health."
+  },
+  "14": {
+    "Leaf Name": "Grape",
+    "Status": "healthy",
+    "Treatment": "No treatment needed."
+  },
+  "15": {
+    "Leaf Name": "Orange",
+    "Status": "Haunglongbing (Citrus greening)",
+    "Cause": "Bacteria Candidatus Liberibacter asiaticus",
+    "Treatment": "No cure, but manage with insecticides to control psyllid vectors.",
+    "Prevention": "Use disease-free seedlings and remove infected trees."
+  },
+  "16": {
+    "Leaf Name": "Peach",
+    "Status": "Bacterial spot",
+    "Cause": "Bacteria Xanthomonas arboricola pv. pruni",
+    "Treatment": "Apply copper-based bactericides.",
+    "Prevention": "Avoid overhead irrigation and use resistant varieties."
+  },
+  "17": {
+    "Leaf Name": "Peach",
+    "Status": "healthy",
+    "Treatment": "No treatment needed."
+  },
+  "18": {
+    "Leaf Name": "Pepper",
+    "Status": "bell Bacterial spot",
+    "Cause": "Bacteria Xanthomonas campestris pv. vesicatoria",
+    "Treatment": "Apply copper-based bactericides.",
+    "Prevention": "Use disease-free seeds and rotate crops."
+  },
+  "19": {
+    "Leaf Name": "Pepper",
+    "Status": "bell healthy",
+    "Treatment": "No treatment needed"
+  },
+  "20": {
+    "Leaf Name": "Potato",
+    "Status": "Early blight",
+    "Cause": "Fungus Alternaria solani",
+    "Treatment": "Apply chlorothalonil or mancozeb fungicides.",
+    "Prevention": "Rotate crops and remove plant debris."
+  },
+  "21": {
+    "Leaf Name": "Potato",
+    "Status": "Late blight",
+    "Cause": "Fungus Phytophthora infestans",
+    "Treatment": "Apply copper-based fungicides. Destroy infected plants.",
+    "Prevention": "Avoid humid conditions and ensure proper ventilation."
+  },
+  "22": {
+    "Leaf Name": "Potato",
+    "Status": "healthy",
+    "Treatment": "No treatment needed."
+  },
+  "23": {
+    "Leaf Name": "Raspberry",
+    "Status": "healthy",
+    "Treatment": "No treatment needed."
+  },
+  "24": {
+    "Leaf Name": "Rice",
+    "Status": "Bacterial leaf blight",
+    "Cause": "Bacteria Xanthomonas oryzae pv. oryzae",
+    "Treatment": "Apply copper-based bactericides.",
+    "Prevention": "Use resistant rice varieties."
+  },
+  "25": {
+    "Leaf Name": "Rice",
+    "Status": "Brown spot",
+    "Cause": "Fungus Cochliobolus miyabeanus",
+    "Treatment": "Apply fungicides (carbendazim, mancozeb).",
+    "Prevention": "Ensure proper soil nutrition."
+  },
+  "26": {
+    "Leaf Name": "Rice",
+    "Status": "Leaf smut",
+    "Cause": "Fungus Entyloma oryzae",
+    "Treatment": "Use seed treatment with fungicides.",
+    "Prevention": "Rotate crops and improve soil health."
+  },
+  "27": {
+    "Leaf Name": "Soybean",
+    "Status": "healthy",
+    "Treatment": "No treatment needed."
+  },
+  "28": {
+    "Leaf Name": "Squash",
+    "Status": "Powdery mildew",
+    "Cause": "Fungus Podosphaera xanthii",
+    "Treatment": "Use neem oil or sulfur-based fungicides.",
+    "Prevention": "Avoid high humidity."
+  },
+  "29": {
+    "Leaf Name": "Strawberry",
+    "Status": "Leaf scorch",
+    "Cause": "Fungus Diplocarpon earlianum",
+    "Treatment": "Apply fungicides (captan or thiophanate-methyl).",
+    "Prevention": "Improve plant spacing and remove infected leaves."
+  },
+  "30": {
+    "Leaf Name": "Strawberry",
+    "Status": "healthy",
+    "Treatment": "No treatment needed."
+  },
+  "31": {
+    "Leaf Name": "Tomato",
+    "Status": "Bacterial spot",
+    "Cause": "Bacteria Xanthomonas campestris pv. vesicatoria",
+    "Treatment": "Apply copper-based sprays.",
+    "Prevention": "Avoid overhead watering."
+  },
+  "32": {
+    "Leaf Name": "Tomato",
+    "Status": "Early blight",
+    "Cause": "Fungus Alternaria solani",
+    "Treatment": "Apply fungicides (chlorothalonil, mancozeb).",
+    "Prevention": "Rotate crops and remove infected leaves."
+  },
+  "33": {
+    "Leaf Name": "Tomato",
+    "Status": "Late blight",
+    "Cause": "Fungus Phytophthora infestans",
+    "Treatment": "Apply copper-based fungicides.",
+    "Prevention": "Ensure good airflow and remove infected plants."
+  },
+  "34": {
+    "Leaf Name": "Tomato",
+    "Status": "Leaf Mold",
+    "Cause": "Fungus Passalora fulva",
+    "Treatment": "Use fungicides (copper-based or chlorothalonil).",
+    "Prevention": "Improve ventilation."
+  },
+  "35": {
+    "Leaf Name": "Tomato",
+    "Status": "Septoria leaf spot",
+    "Cause": "Fungus Septoria lycopersici",
+    "Treatment": "Apply fungicides (mancozeb, copper-based).",
+    "Prevention": "Remove diseased leaves."
+  },
+  "36": {
+    "Leaf Name": "Tomato",
+    "Status": "Spider mites, Two-spotted spider mite",
+    "Cause": "Tetranychus urticae",
+    "Treatment": "Use insecticidal soap or neem oil.",
+    "Prevention": "Keep humidity levels balanced."
+  },
+  "37": {
+    "Leaf Name": "Tomato",
+    "Status": "Target Spot",
+    "Cause": "Fungus Corynespora cassiicola",
+    "Treatment": "Apply fungicides (chlorothalonil, mancozeb).",
+    "Prevention": "Avoid excessive nitrogen fertilization."
+  },
+  "38": {
+    "Leaf Name": "Tomato",
+    "Status": "Tomato Yellow Leaf Curl Virus",
+    "Cause": "Virus (spread by whiteflies)",
+    "Treatment": "Remove infected plants and control whiteflies.",
+    "Prevention": "Use insect-proof netting."
+  },
+  "39": {
+    "Leaf Name": "Tomato",
+    "Status": "Tomato mosaic virus",
+    "Cause": "Virus Tobamovirus",
+    "Treatment": "Remove infected plants.",
+    "Prevention": "Disinfect tools and wash hands."
+  },
+  "40": {
+    "Leaf Name": "Tomato",
+    "Status": "healthy",
+    "Treatment": "No treatment needed."
+  }
+}

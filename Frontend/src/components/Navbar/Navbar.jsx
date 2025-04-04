@@ -3,6 +3,7 @@ import { useUser, SignInButton, SignedOut, SignedIn, UserButton } from "@clerk/c
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Home, Leaf, Users, MessageSquare, Contact, BarChart2, Bug } from "lucide-react";
+import krishimitralogo from '../../assets/krishimitrapnglogo.png'
 
 const Navbar = () => {
   const { isSignedIn, user } = useUser();
@@ -49,7 +50,7 @@ const Navbar = () => {
   ];
 
   const privateNavLinks = [
-    { name: "Smartintegration", href: "/smartintegration", icon: <Home className="w-5 h-5 text-green-500" /> },
+    { name: "SmartIrrigation", href: "/smartIrrigation", icon: <Home className="w-5 h-5 text-green-500" /> },
     { name: "Weather & Soil", href: "/weathersoildata", icon: <BarChart2 className="w-5 h-5 text-green-500" /> },
     { name: "Crop Recomendation", href: "/croprecommendation", icon: <Leaf className="w-5 h-5 text-green-500" /> },
     { name: "Pest Detection", href: "/pestdetection", icon: <Bug className="w-5 h-5 text-green-500" /> },
@@ -79,7 +80,7 @@ const Navbar = () => {
               onClick={() => handleNavClick("/")}
               className="flex items-center"
             >
-              <img src="/logo.png" alt="Logo" className="h-8" />
+              <img src={krishimitralogo} alt="Logo" className="h-8" />
               <span className="ml-2 text-xl font-bold text-green-600 hidden sm:block">Krishii Mitra</span>
             </Link>
           </motion.div>

@@ -81,22 +81,22 @@ const Chatbot = () => {
         try {
             // Add typing indicator
             setMessages(prev => [...prev, { text: "Bot is typing...", sender: 'bot', temporary: true }]);
-            
+
             const data = await callChatAPI(inputMessage);
-            
+
             // Remove typing indicator and add bot response
             setMessages(prev => [
                 ...prev.filter(msg => !msg.temporary),
                 { text: data.response, sender: 'bot' }
             ]);
-            
+
             await callSpeakAPI(data.response);
         } catch (error) {
             setMessages(prev => [
                 ...prev.filter(msg => !msg.temporary),
-                { 
-                    text: "Sorry, I'm having trouble connecting to the assistant.", 
-                    sender: 'bot' 
+                {
+                    text: "Sorry, I'm having trouble connecting to the assistant.",
+                    sender: 'bot'
                 }
             ]);
         } finally {
@@ -109,34 +109,34 @@ const Chatbot = () => {
 
         setIsListening(true);
         setIsProcessing(true);
-        
+
         // Show listening indicator
         setMessages(prev => [...prev, { text: "Listening...", sender: 'bot', temporary: true }]);
 
         try {
             // Step 1: Get only the user's speech input
             const recognitionData = await callChatAPI('', 'speech', true);
-            
+
             if (!recognitionData.user_input) {
                 throw new Error('Could not understand your voice');
             }
 
             // Remove listening indicator
             setMessages(prev => prev.filter(msg => !msg.temporary));
-            
+
             // Step 2: Add user's spoken question
-            const userMessage = { 
-                text: recognitionData.user_input, 
-                sender: 'user' 
+            const userMessage = {
+                text: recognitionData.user_input,
+                sender: 'user'
             };
             setMessages(prev => [...prev, userMessage]);
 
             // Add typing indicator
             setMessages(prev => [...prev, { text: "Bot is typing...", sender: 'bot', temporary: true }]);
-            
+
             // Step 3: Get bot response to the user's question
             const botResponse = await callChatAPI(userMessage.text);
-            
+
             // Remove typing indicator and add bot response
             setMessages(prev => [
                 ...prev.filter(msg => !msg.temporary),
@@ -150,9 +150,9 @@ const Chatbot = () => {
             console.error('Voice interaction error:', error);
             setMessages(prev => [
                 ...prev.filter(msg => !msg.temporary),
-                { 
-                    text: error.message || "Sorry, I couldn't process your voice request.", 
-                    sender: 'bot' 
+                {
+                    text: error.message || "Sorry, I couldn't process your voice request.",
+                    sender: 'bot'
                 }
             ]);
         } finally {
@@ -170,13 +170,29 @@ const Chatbot = () => {
     return (
         <div className={`fixed bottom-6 right-6 z-50 ${isOpen ? 'w-80' : ''}`}>
             {!isOpen ? (
-                <button
-                    onClick={toggleChat}
-                    className="flex items-center justify-center w-14 h-14 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition-all hover:scale-110"
-                    aria-label="Open chatbot"
-                >
-                    <FaRobot className="text-xl" />
-                </button>
+                <div className="flex flex-col items-center justify-center space-y-4">
+                    {/* Heading with subtle animation */}
+                    <h1
+                        className="text-3xl font-bold text-gray-800 mb-4"
+                        style={{
+                            animation: 'float 3s ease-in-out infinite',
+                        }}
+                    >
+                        Hello!!
+                    </h1>
+
+                    {/* Button with hover animation */}
+                    <button
+                        onClick={toggleChat}
+                        className="relative flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:-translate-y-1 active:scale-95 group"
+                        aria-label="Open chatbot"
+                    >
+                        <FaRobot className="text-2xl transform group-hover:scale-110 transition-transform" />
+
+                        {/* Pulsing ring effect */}
+                        <span className="absolute inset-0 border-2 border-green-300 rounded-full animate-ping opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                    </button>
+                </div>
             ) : (
                 <div className="flex flex-col h-[500px] bg-white rounded-lg shadow-xl overflow-hidden border border-gray-200">
                     {/* Header */}
@@ -197,11 +213,10 @@ const Chatbot = () => {
                             !message.temporary && (
                                 <div
                                     key={index}
-                                    className={`mb-3 max-w-[80%] p-3 rounded-lg ${
-                                        message.sender === 'user'
-                                            ? 'ml-auto bg-green-600 text-white rounded-br-none'
-                                            : 'mr-auto bg-gray-200 text-gray-800 rounded-bl-none'
-                                    }`}
+                                    className={`mb-3 max-w-[80%] p-3 rounded-lg ${message.sender === 'user'
+                                        ? 'ml-auto bg-green-600 text-white rounded-br-none'
+                                        : 'mr-auto bg-gray-200 text-gray-800 rounded-bl-none'
+                                        }`}
                                 >
                                     {message.text}
                                 </div>
@@ -236,11 +251,10 @@ const Chatbot = () => {
                         <button
                             onClick={handleListen}
                             disabled={isListening || isProcessing}
-                            className={`ml-2 p-2 rounded-full ${
-                                isListening
-                                    ? 'bg-red-500 text-white animate-pulse'
-                                    : 'text-green-600 hover:bg-gray-100 disabled:opacity-50'
-                            }`}
+                            className={`ml-2 p-2 rounded-full ${isListening
+                                ? 'bg-red-500 text-white animate-pulse'
+                                : 'text-green-600 hover:bg-gray-100 disabled:opacity-50'
+                                }`}
                             aria-label="Voice input"
                         >
                             <FaMicrophone />
@@ -248,11 +262,10 @@ const Chatbot = () => {
                         <button
                             onClick={handleSendMessage}
                             disabled={!inputMessage.trim() || isListening || isProcessing}
-                            className={`ml-2 p-2 rounded-full ${
-                                inputMessage.trim() && !isListening && !isProcessing
-                                    ? 'text-green-600 hover:bg-gray-100'
-                                    : 'text-gray-400 cursor-not-allowed'
-                            }`}
+                            className={`ml-2 p-2 rounded-full ${inputMessage.trim() && !isListening && !isProcessing
+                                ? 'text-green-600 hover:bg-gray-100'
+                                : 'text-gray-400 cursor-not-allowed'
+                                }`}
                             aria-label="Send message"
                         >
                             <FaPaperPlane />

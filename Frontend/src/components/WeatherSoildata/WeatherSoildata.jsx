@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  FiDroplet, 
-  FiThermometer, 
-  FiCloud, 
-  FiWind, 
-  FiMapPin, 
-  FiSun,
-  FiCalendar,
-  FiRefreshCw,
-  FiNavigation,
-  FiDatabase
+  FiDroplet, FiThermometer, FiCloud, FiWind, FiMapPin, 
+  FiSun, FiCalendar, FiRefreshCw, FiNavigation, FiDatabase 
 } from 'react-icons/fi';
+import mqtt from 'mqtt';
 import axios from 'axios';
 import { Line, Bar } from 'react-chartjs-2';
 import {
@@ -47,8 +40,19 @@ const WeatherSoildata = () => {
     windSpeed: '--',
     lastUpdated: '--'
   });
+
+  const skyConditionIcons = {
+    'clear': <FiSun className="text-yellow-500 text-2xl" />,
+    'clouds': <FiCloud className="text-gray-500 text-2xl" />,
+    'rain': <FiDroplet className="text-blue-500 text-2xl" />,
+    'thunderstorm': <FiCloud className="text-purple-500 text-2xl" />,
+    'drizzle': <FiDroplet className="text-blue-300 text-2xl" />,
+    'snow': <FiCloud className="text-blue-100 text-2xl" />,
+    'mist': <FiCloud className="text-gray-300 text-2xl" />,
+    'default': <FiCloud className="text-gray-500 text-2xl" />
+  };
   
-  // Soil data state
+  // Soil data state (now from MQTT)
   const [soilData, setSoilData] = useState({
     moisture: '--',
     temperature: '--',
@@ -56,7 +60,7 @@ const WeatherSoildata = () => {
     lastUpdated: '--'
   });
   
-  // Historical data state (now using random values)
+  // Historical data state
   const [historicalData, setHistoricalData] = useState({
     temperature: [],
     rainfall: [],
@@ -72,135 +76,20 @@ const WeatherSoildata = () => {
   const [coords, setCoords] = useState({ lat: null, lon: null });
   const [daysToShow, setDaysToShow] = useState(7);
   const [locationPermission, setLocationPermission] = useState('prompt');
+  const [mqttClient, setMqttClient] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState('disconnected');
+
+  // MQTT Configuration
+  const MQTT_BROKER = 'ws://192.168.120.9:9001';
+  const MQTT_TOPICS = {
+    SOIL_MOISTURE: 'krishii/sensor/soil',
+    SOIL_TEMP: 'krishii/sensor/temp',
+    SOIL_HUMIDITY: 'krishii/sensor/humidity'
+  };
 
   // API endpoints
   const WEATHER_API_KEY = '824486414437db7a528a1d6737b565f7';
   const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
-  const SOIL_API_URL = 'https://your-soil-api.example.com/sensor'; // Replace with your soil API
-
-  // Sky condition icons mapping
-  const skyConditionIcons = {
-    'clear': <FiSun className="text-yellow-500 text-2xl" />,
-    'clouds': <FiCloud className="text-gray-500 text-2xl" />,
-    'rain': <FiDroplet className="text-blue-500 text-2xl" />,
-    'thunderstorm': <FiCloud className="text-purple-500 text-2xl" />,
-    'drizzle': <FiDroplet className="text-blue-300 text-2xl" />,
-    'snow': <FiCloud className="text-blue-100 text-2xl" />,
-    'mist': <FiCloud className="text-gray-300 text-2xl" />
-  };
-
-  // Get user's current location
-  const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      setIsLoading(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCoords({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude
-          });
-          setLocationPermission('granted');
-          fetchWeatherData(position.coords.latitude, position.coords.longitude);
-          fetchSoilData();
-          generateHistoricalData();
-        },
-        (err) => {
-          setError('Location access denied. Using default location.');
-          setLocationPermission('denied');
-          // Fallback to a default location (e.g., New York)
-          const defaultLat = 40.7128;
-          const defaultLon = -74.0060;
-          setCoords({ lat: defaultLat, lon: defaultLon });
-          fetchWeatherData(defaultLat, defaultLon);
-          fetchSoilData();
-          generateHistoricalData();
-        }
-      );
-    } else {
-      setError('Geolocation is not supported by your browser.');
-      setLocationPermission('denied');
-    }
-  };
-
-  // Fetch current weather data
-  const fetchWeatherData = async (lat, lon) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(
-        `${WEATHER_API_URL}?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`
-      );
-      
-      const data = response.data;
-      const condition = data.weather[0].main.toLowerCase();
-      
-      setWeatherData({
-        location: data.name,
-        humidity: `${data.main.humidity}%`,
-        temperature: `${Math.round(data.main.temp)}°C`,
-        skyCondition: condition,
-        windSpeed: `${(data.wind.speed * 3.6).toFixed(1)} km/h`,
-        lastUpdated: new Date().toLocaleTimeString()
-      });
-    } catch (err) {
-      setError('Failed to fetch weather data');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch soil sensor data
-  const fetchSoilData = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // In a real app, this would be an actual API call
-      // const response = await axios.get(SOIL_API_URL);
-      // const data = response.data;
-      
-      // Mock response for demonstration
-      const mockResponse = {
-        moisture: `${Math.floor(Math.random() * 100)}%`,
-        temperature: `${Math.floor(Math.random() * 10) + 15}°C`, // 15-25°C range
-        humidity: `${Math.floor(Math.random() * 30) + 50}%`, // 50-80% range
-        lastUpdated: new Date().toLocaleTimeString()
-      };
-      
-      setSoilData(mockResponse);
-    } catch (err) {
-      setError('Failed to fetch soil sensor data');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Generate random historical data
-  const generateHistoricalData = () => {
-    const tempData = [];
-    const rainData = [];
-    const dates = [];
-    
-    // Generate data for the selected number of days
-    for (let i = daysToShow - 1; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      dates.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
-      tempData.push(Math.floor(Math.random() * 15) + 15); // 15-30°C range
-      rainData.push(Math.random() > 0.7 ? (Math.random() * 10).toFixed(1) : 0); // 70% chance of no rain
-    }
-    
-    setHistoricalData({
-      temperature: tempData,
-      rainfall: rainData,
-      dates: dates,
-      maxTemp: `${Math.max(...tempData)}°C`,
-      minTemp: `${Math.min(...tempData)}°C`,
-      maxRainfall: `${Math.max(...rainData)} mm`,
-      minRainfall: `${Math.min(...rainData)} mm`
-    });
-  };
 
   // Temperature chart configuration
   const tempChartData = {
@@ -273,15 +162,197 @@ const WeatherSoildata = () => {
     }
   };
 
-  // Initial data fetch with current location
+  // Initialize MQTT connection
+  useEffect(() => {
+    const client = mqtt.connect(MQTT_BROKER, {
+      reconnectPeriod: 5000,
+      connectTimeout: 30000,
+      clientId: 'web-client-' + Math.random().toString(16).substr(2, 8),
+      clean: true
+    });
+
+    client.on('connect', () => {
+      setConnectionStatus('connected');
+      console.log('Connected to MQTT broker');
+      
+      const subscribeToTopic = (topic) => {
+        client.subscribe(topic, { qos: 1 }, (err) => {
+          if (err) {
+            console.error(`Subscription error for ${topic}:`, err);
+            setTimeout(() => subscribeToTopic(topic), 2000);
+          } else {
+            console.log(`Subscribed to ${topic}`);
+          }
+        });
+      };
+
+      subscribeToTopic(MQTT_TOPICS.SOIL_MOISTURE);
+      subscribeToTopic(MQTT_TOPICS.SOIL_TEMP);
+      subscribeToTopic(MQTT_TOPICS.SOIL_HUMIDITY);
+    });
+
+    client.on('message', (topic, message) => {
+      const data = message.toString();
+      const updateTime = new Date().toLocaleTimeString();
+      
+      switch(topic) {
+        case MQTT_TOPICS.SOIL_MOISTURE:
+          setSoilData(prev => ({
+            ...prev,
+            moisture: `${parseFloat(data).toFixed(1)}%`,
+            lastUpdated: updateTime
+          }));
+          break;
+          
+        case MQTT_TOPICS.SOIL_TEMP:
+          setSoilData(prev => ({
+            ...prev,
+            temperature: `${parseFloat(data).toFixed(1)}°C`,
+            lastUpdated: updateTime
+          }));
+          break;
+          
+        case MQTT_TOPICS.SOIL_HUMIDITY:
+          setSoilData(prev => ({
+            ...prev,
+            humidity: `${parseFloat(data).toFixed(1)}%`,
+            lastUpdated: updateTime
+          }));
+          break;
+          
+        default:
+          console.log('Received message on unhandled topic:', topic);
+      }
+    });
+
+    client.on('error', (err) => {
+      setConnectionStatus('error');
+      console.error('Connection error:', err);
+      setError('MQTT connection error');
+    });
+
+    client.on('close', () => {
+      setConnectionStatus('disconnected');
+      console.log('Connection closed');
+    });
+
+    client.on('reconnect', () => {
+      setConnectionStatus('reconnecting');
+      console.log('Attempting to reconnect...');
+    });
+
+    setMqttClient(client);
+
+    return () => {
+      if (client) {
+        client.end(true, () => {
+          console.log('Cleanly disconnected MQTT client');
+        });
+      }
+    };
+  }, []);
+
+  // Get user's current location
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      setIsLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCoords({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude
+          });
+          setLocationPermission('granted');
+          fetchWeatherData(position.coords.latitude, position.coords.longitude);
+          generateHistoricalData();
+        },
+        (err) => {
+          setError('Location access denied. Using default location.');
+          setLocationPermission('denied');
+          const defaultLat = 40.7128;
+          const defaultLon = -74.0060;
+          setCoords({ lat: defaultLat, lon: defaultLon });
+          fetchWeatherData(defaultLat, defaultLon);
+          generateHistoricalData();
+        }
+      );
+    } else {
+      setError('Geolocation is not supported by your browser.');
+      setLocationPermission('denied');
+    }
+  };
+
+  // Fetch current weather data
+  const fetchWeatherData = async (lat, lon) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(
+        `${WEATHER_API_URL}?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`
+      );
+      
+      const data = response.data;
+      const condition = data.weather[0].main.toLowerCase();
+      
+      setWeatherData({
+        location: data.name,
+        humidity: `${data.main.humidity}%`,
+        temperature: `${Math.round(data.main.temp)}°C`,
+        skyCondition: condition,
+        windSpeed: `${(data.wind.speed * 3.6).toFixed(1)} km/h`,
+        lastUpdated: new Date().toLocaleTimeString()
+      });
+    } catch (err) {
+      setError('Failed to fetch weather data');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Request soil data update via MQTT
+  const requestSoilUpdate = () => {
+    if (mqttClient) {
+      mqttClient.publish('krishii/sensor/request', 'update');
+      setSoilData(prev => ({
+        ...prev,
+        lastUpdated: 'Requesting update...'
+      }));
+    }
+  };
+
+  // Generate historical data
+  const generateHistoricalData = () => {
+    const tempData = [];
+    const rainData = [];
+    const dates = [];
+    
+    for (let i = daysToShow - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      dates.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
+      tempData.push(Math.floor(Math.random() * 15) + 15);
+      rainData.push(Math.random() > 0.7 ? (Math.random() * 10).toFixed(1) : 0);
+    }
+    
+    setHistoricalData({
+      temperature: tempData,
+      rainfall: rainData,
+      dates: dates,
+      maxTemp: `${Math.max(...tempData)}°C`,
+      minTemp: `${Math.min(...tempData)}°C`,
+      maxRainfall: `${Math.max(...rainData)} mm`,
+      minRainfall: `${Math.min(...rainData)} mm`
+    });
+  };
+
+  // Initial data fetch
   useEffect(() => {
     getCurrentLocation();
     
-    // Set up polling for real-time updates (every 30 minutes)
     const interval = setInterval(() => {
       if (coords.lat && coords.lon) {
         fetchWeatherData(coords.lat, coords.lon);
-        fetchSoilData();
       }
     }, 1800000);
     
@@ -301,6 +372,17 @@ const WeatherSoildata = () => {
           <p className="text-gray-600">Weather and soil monitoring system</p>
         </header>
         
+        {/* Connection Status */}
+        <div className="mb-4 flex items-center">
+          <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
+            connectionStatus === 'connected' ? 'bg-green-500' : 
+            connectionStatus === 'reconnecting' ? 'bg-yellow-500' : 'bg-red-500'
+          }`}></span>
+          <span className="text-sm">
+            MQTT: {connectionStatus}
+          </span>
+        </div>
+
         {/* Location Controls */}
         <div className="mb-6 bg-white p-4 rounded-lg shadow">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -382,7 +464,7 @@ const WeatherSoildata = () => {
               <div className="flex items-center mb-3">
                 {weatherData.skyCondition in skyConditionIcons 
                   ? skyConditionIcons[weatherData.skyCondition]
-                  : <FiCloud className="text-gray-500 mr-2" />}
+                  : skyConditionIcons['default']}
                 <h3 className="font-medium text-gray-700 ml-2">Sky Condition</h3>
               </div>
               <p className="text-2xl font-bold text-gray-800 capitalize">
@@ -399,7 +481,6 @@ const WeatherSoildata = () => {
               onClick={() => {
                 if (coords.lat && coords.lon) {
                   fetchWeatherData(coords.lat, coords.lon);
-                  fetchSoilData();
                   generateHistoricalData();
                 }
               }}
@@ -407,7 +488,7 @@ const WeatherSoildata = () => {
               className="flex items-center text-sm bg-green-100 text-green-700 px-4 py-2 rounded hover:bg-green-200 transition"
             >
               <FiRefreshCw className={`mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh All Data
+              Refresh Weather Data
             </button>
           </div>
         </section>
@@ -426,7 +507,7 @@ const WeatherSoildata = () => {
                 <h3 className="font-medium text-gray-700">Soil Moisture</h3>
               </div>
               <p className="text-2xl font-bold text-teal-600">
-                {isLoading ? '...' : soilData.moisture}
+                {soilData.moisture}
               </p>
             </div>
             
@@ -437,7 +518,7 @@ const WeatherSoildata = () => {
                 <h3 className="font-medium text-gray-700">Soil Temperature</h3>
               </div>
               <p className="text-2xl font-bold text-amber-600">
-                {isLoading ? '...' : soilData.temperature}
+                {soilData.temperature}
               </p>
             </div>
             
@@ -448,7 +529,7 @@ const WeatherSoildata = () => {
                 <h3 className="font-medium text-gray-700">Soil Humidity</h3>
               </div>
               <p className="text-2xl font-bold text-indigo-600">
-                {isLoading ? '...' : soilData.humidity}
+                {soilData.humidity}
               </p>
             </div>
           </div>
@@ -458,12 +539,12 @@ const WeatherSoildata = () => {
               Last updated: {soilData.lastUpdated}
             </p>
             <button 
-              onClick={fetchSoilData}
-              disabled={isLoading}
+              onClick={requestSoilUpdate}
+              disabled={isLoading || !mqttClient || connectionStatus !== 'connected'}
               className="flex items-center text-sm bg-green-100 text-green-700 px-4 py-2 rounded hover:bg-green-200 transition"
             >
               <FiRefreshCw className={`mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh Soil Data
+              Request Soil Update
             </button>
           </div>
         </section>
@@ -482,7 +563,7 @@ const WeatherSoildata = () => {
                   <Line data={tempChartData} options={tempChartOptions} />
                 ) : (
                   <div className="h-full flex items-center justify-center text-gray-500">
-                    {isLoading ? 'Loading temperature data...' : 'No temperature data available'}
+                    Loading temperature data...
                   </div>
                 )}
               </div>
@@ -505,7 +586,7 @@ const WeatherSoildata = () => {
                   <Bar data={rainChartData} options={rainChartOptions} />
                 ) : (
                   <div className="h-full flex items-center justify-center text-gray-500">
-                    {isLoading ? 'Loading rainfall data...' : 'No rainfall data available'}
+                    Loading rainfall data...
                   </div>
                 )}
               </div>
@@ -527,12 +608,16 @@ const WeatherSoildata = () => {
         <section className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold text-green-700 mb-4">System Status</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-              <p className="text-sm text-green-600 mb-1">Weather API</p>
-              <p className="font-medium text-green-800">Connected</p>
+            <div className={`p-4 rounded-lg border ${
+              connectionStatus === 'connected' ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'
+            }`}>
+              <p className="text-sm mb-1">MQTT Connection</p>
+              <p className="font-medium">
+                {connectionStatus === 'connected' ? 'Connected' : 'Disconnected'}
+              </p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-              <p className="text-sm text-green-600 mb-1">Soil Sensor</p>
+              <p className="text-sm text-green-600 mb-1">Weather API</p>
               <p className="font-medium text-green-800">Connected</p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg border border-green-100">
